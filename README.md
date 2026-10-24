@@ -1,5 +1,6 @@
-# handoff
+(preview of connector site) 
 <img width="1161" height="649" alt="image" src="https://github.com/user-attachments/assets/d9da49b9-f9ec-4b03-87a3-f27a808f314e" />
+# handoff
 
 no webcam? use your phone. handoff turns your phone into a camera for touchdesigner over wifi, and sends its tilt, motion and touches along with it.
 
