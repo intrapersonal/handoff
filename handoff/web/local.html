@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>handoff</title>
+<style>
+:root{--bg:#0a0e0c;--panel:#111714;--fg:#ece7dc;--soft:rgba(236,231,220,.6);--faint:rgba(236,231,220,.35);--line:rgba(236,231,220,.12);--ok:#9fd8b4;--bad:#f08a7a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:40px 24px 64px;display:grid;grid-template-columns:320px minmax(0,1fr);gap:40px}
+h1{margin:0 0 6px;font-weight:300;font-size:56px;letter-spacing:-.04em;line-height:1}
+.sub{margin:0 0 28px;color:var(--soft)}
+.qr{width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden}
+.qr svg{display:block;width:100%;height:100%}
+.url{margin:14px 0 0;font:13px ui-monospace,Consolas,monospace;color:var(--soft);word-break:break-all;user-select:all}
+.view{position:relative;aspect-ratio:16/9;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid;place-items:center}
+.view img{width:100%;height:100%;object-fit:contain;display:block}
+.view span{position:absolute;color:var(--faint)}
+.row{display:flex;flex-wrap:wrap;gap:8px 24px;margin:14px 2px 0;font-size:14px;color:var(--soft);font-variant-numeric:tabular-nums}
+.row b{color:var(--fg);font-weight:500}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:8px;vertical-align:1px}
+.dot.ok{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.td{margin-top:32px;border-top:1px solid var(--line)}
+.td div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 2px;border-bottom:1px solid var(--line)}
+.td dt{color:var(--faint)}
+.td dd{margin:0}
+code{font:13px ui-monospace,Consolas,monospace;color:var(--fg)}
+@media (max-width:820px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>handoff</h1>
+    <p class="sub">scan with your phone camera</p>
+    <div class="qr">{{qr}}</div>
+    <p class="url">{{url}}</p>
+  </div>
+  <div>
+    <div class="view"><span id="waiting">waiting for a phone</span><img id="img" alt="" hidden></div>
+    <div class="row">
+      <span><i id="dot" class="dot"></i><b id="who">no phone</b></span>
+      <span id="size"></span>
+      <span id="fps"></span>
+      <span id="rtt"></span>
+    </div>
+    <dl class="td">
+      <div><dt>video</dt><dd>Syphon Spout In TOP, sender <code id="spout">handoff</code> <span id="spoutState"></span></dd></div>
+      <div><dt>phone sensors</dt><dd>OSC In CHOP, port <code id="osc">7410</code></dd></div>
+      <div><dt>anything else</dt><dd><code id="mjpeg">/stream.mjpg</code></dd></div>
+    </dl>
+  </div>
+</div>
+<script>
+let streaming = false;
+async function poll() {
+  try {
+    const s = await (await fetch("/status.json", { cache: "no-store" })).json();
+    document.getElementById("dot").className = "dot" + (s.connected ? " ok" : "");
+    document.getElementById("who").textContent = s.connected ? s.phone || "phone" : "no phone";
+    document.getElementById("size").textContent = s.connected && s.width ? `${s.width}×${s.height}` : "";
+    document.getElementById("fps").textContent = s.connected ? `${s.fps} fps` : "";
+    document.getElementById("rtt").textContent = s.connected ? `${Math.round(s.rtt)} ms` : "";
+    document.getElementById("spout").textContent = s.spout_name;
+    document.getElementById("spoutState").textContent = s.spout === "on" ? "" : `(${s.spout})`;
+    document.getElementById("osc").textContent = s.osc.split(":").pop();
+    document.getElementById("mjpeg").textContent = s.mjpeg;
+    if (s.connected && !streaming) {
+      streaming = true;
+      const img = document.getElementById("img");
+      img.src = "/stream.mjpg?" + Date.now();
+      img.hidden = false;
+      document.getElementById("waiting").hidden = true;
+    }
+    if (!s.connected && streaming && s.fps === 0) {
+      streaming = false;
+      const img = document.getElementById("img");
+      img.removeAttribute("src");
+      img.hidden = true;
+      document.getElementById("waiting").hidden = false;
+    }
+  } catch (e) {}
+  setTimeout(poll, 1000);
+}
+poll();
+</script>
+</body>
+</html>
