@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0a0e0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg">
+<title>handoff</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main id="intro" class="intro">
+  <div class="mark"><span></span></div>
+  <h1>handoff</h1>
+  <p>your phone is the camera now. point it at whatever touchdesigner should see.</p>
+  <button id="start" class="go" type="button">start</button>
+  <p id="note" class="note"></p>
+</main>
+
+<section id="live" class="live" hidden>
+  <video id="video" playsinline muted autoplay></video>
+  <div id="surface" class="surface"></div>
+  <div id="dots" class="dots"></div>
+  <header class="bar top">
+    <span id="state" class="pill"><i></i><b id="stateText">connecting</b></span>
+    <span id="stats" class="stats"></span>
+  </header>
+  <footer class="bar bottom">
+    <button id="flip" type="button">flip</button>
+    <button id="res" type="button">720p</button>
+    <button id="torch" type="button" hidden>light</button>
+    <button id="dim" type="button">dim</button>
+  </footer>
+  <div id="shade" class="shade" hidden>
+    <p>still sending. tap to wake</p>
+  </div>
+  <div id="kicked" class="kicked" hidden>
+    <p>another phone took over</p>
+    <button id="retake" class="go" type="button">take it back</button>
+  </div>
+</section>
+
+<canvas id="canvas" hidden></canvas>
+<script src="/app.js"></script>
+</body>
+</html>
