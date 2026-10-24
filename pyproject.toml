@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "handoff"
+version = "0.1.0"
+description = "use your phone as a camera for touchdesigner"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "opencv-python-headless>=4.8",
+  "cryptography>=42",
+]
+
+[project.optional-dependencies]
+windows = ["SpoutGL"]
+
+[project.scripts]
+handoff = "handoff.cli:main"
+
+[tool.setuptools]
+packages = ["handoff"]
+
+[tool.setuptools.package-data]
+handoff = ["web/*"]
