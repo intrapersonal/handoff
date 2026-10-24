@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from . import __version__, qr
+from .hands import Hands
 from .hub import Hub
 from .sensors import Sensors
 from .ws import Closed, Socket, upgrade
@@ -67,6 +68,11 @@ class Server:
         self.rtt = 0.0
         self.front = False
         self.started = time.time()
+        self.hands = None
+        if cfg.get("hands"):
+            h = Hands(f"http://127.0.0.1:{cfg['local_port']}/stream.mjpg", cfg.get("hands_streams", "hands"),
+                      cfg.get("wintd_port", 7400), cfg.get("data_dir"), log)
+            self.hands = h if h.available() else None
 
     @property
     def url(self):
@@ -92,6 +98,7 @@ class Server:
             "spout_name": self.cfg["spout_name"],
             "osc": f"{self.cfg['osc_host']}:{self.cfg['osc_port']}",
             "mjpeg": self.local + "/stream.mjpg",
+            "hands": self.hands.state if self.hands else "off",
         }
 
     async def phone_conn(self, reader, writer):
@@ -223,6 +230,8 @@ class Server:
             self.sensors.video(self.hub.fps, self.hub.width, self.hub.height, self.rtt, self.front)
             self.sensors.tick()
             n += 1
+            if self.hands and n % 15 == 0:
+                self.hands.tick(self.phone is not None and self.hub.fps > 0, self.front)
             if n % 60 == 0 and self.cfg["live"] and sys.stdout.isatty():
                 s = self.status()
                 line = (f"live  {s['width']}x{s['height']}  {s['fps']:.0f} fps  {s['rtt']:.0f} ms"
@@ -238,5 +247,7 @@ class Server:
             await asyncio.gather(phone.serve_forever(), local.serve_forever(), self.ticker())
 
     def close(self):
+        if self.hands:
+            self.hands.stop()
         self.hub.close()
         self.sensors.close()

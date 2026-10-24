@@ -19,6 +19,9 @@ def parse(argv=None):
     ap.add_argument("--osc-port", type=int, default=7410)
     ap.add_argument("--spout-name", default="handoff")
     ap.add_argument("--no-spout", action="store_true")
+    ap.add_argument("--no-hands", action="store_true", help="don't run wintd hand tracking on the phone")
+    ap.add_argument("--track", default="hands", help="wintd streams to run, like hands,face,pose")
+    ap.add_argument("--wintd-port", type=int, default=7400)
     ap.add_argument("--res", type=int, default=720, choices=(360, 480, 720, 1080))
     ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--quality", type=float, default=0.75)
@@ -53,7 +56,8 @@ def main(argv=None):
         "port": a.port, "local_port": a.local_port, "bind": a.bind, "osc_host": a.osc_host,
         "osc_port": a.osc_port, "spout_name": a.spout_name, "spout": not a.no_spout, "res": a.res,
         "fps": max(1, min(60, a.fps)), "quality": max(0.3, min(0.95, a.quality)), "mirror": a.mirror,
-        "rotate": a.rotate, "live": not a.quiet,
+        "rotate": a.rotate, "live": not a.quiet, "hands": not a.no_hands, "hands_streams": a.track,
+        "wintd_port": a.wintd_port, "data_dir": folder,
     }
     from .server import Server
     srv = Server(cfg, ctx, ips)
@@ -68,6 +72,12 @@ def main(argv=None):
     print(f"\nspout   {a.spout_name}" + ("  (off)" if a.no_spout else ""))
     print(f"osc     {a.osc_host}:{a.osc_port}")
     print(f"mjpeg   {srv.local}/stream.mjpg")
+    if a.no_hands:
+        print("hands   off")
+    elif srv.hands:
+        print(f"hands   wintd ({a.track}) on osc {a.wintd_port}, starts when the phone does")
+    else:
+        print("hands   install wintd in touchdesigner once and this turns on by itself")
     print(f"status  {srv.local}\n")
     if a.open:
         webbrowser.open(srv.local)

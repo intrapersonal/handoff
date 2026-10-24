@@ -50,14 +50,13 @@ ph_t0_x  ph_t0_y  ph_t0_down  ph_t1_x ...  ph_t2_down
 - touches are 0 to 1 across the screen with y going up, so the whole phone screen is a touchpad. `pinch_amt` starts at 1 when two fingers go down and grows or shrinks as you spread them
 - when the phone drops off everything goes to 0 and `ph_connected` goes to 0
 
-## with wintd
+## hand tracking
 
-wintd can track your hands, face and pose off the phone instead of a webcam:
+if you've installed wintd in touchdesigner before, handoff runs its hand tracking on the phone by itself. nothing to set up. once the phone is live the `h0_index_tip_x` style channels show up on port 7400 like normal, and they stop when the phone does.
 
-```
-python -m handoff --fps 25
-python -m wintd --video-file http://127.0.0.1:7421/stream.mjpg --streams hands
-```
+turn **Active** off on the wintd component while you use handoff so the two don't fight over the port.
+
+want face or pose too? `python -m handoff --track hands,face,pose`. don't want it at all? `--no-hands`.
 
 ## on the phone
 

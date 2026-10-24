@@ -48,6 +48,7 @@ code{font:13px ui-monospace,Consolas,monospace;color:var(--fg)}
     <dl class="td">
       <div><dt>video</dt><dd>Syphon Spout In TOP, sender <code id="spout">handoff</code> <span id="spoutState"></span></dd></div>
       <div><dt>phone sensors</dt><dd>OSC In CHOP, port <code id="osc">7410</code></dd></div>
+      <div><dt>hand tracking</dt><dd id="hands">off</dd></div>
       <div><dt>anything else</dt><dd><code id="mjpeg">/stream.mjpg</code></dd></div>
     </dl>
   </div>
@@ -66,6 +67,7 @@ async function poll() {
     document.getElementById("spoutState").textContent = s.spout === "on" ? "" : `(${s.spout})`;
     document.getElementById("osc").textContent = s.osc.split(":").pop();
     document.getElementById("mjpeg").textContent = s.mjpeg;
+    document.getElementById("hands").textContent = s.hands === "on" ? "running, osc 7400" : s.hands === "waiting" ? "starts when the phone does" : "off (install wintd once to turn this on)";
     if (s.connected && !streaming) {
       streaming = true;
       const img = document.getElementById("img");
